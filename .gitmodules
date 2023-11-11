@@ -1,0 +1,21 @@
+[submodule "bayun-api-forms"]
+	path = bayun-api-forms
+	url = https://github.com/msyaskov/bayun-api-forms
+[submodule "bayun-api-gateway"]
+	path = bayun-api-gateway
+	url = https://github.com/msyaskov/bayun-api-gateway
+[submodule "bayun-ms-users"]
+	path = bayun-ms-users
+	url = https://github.com/msyaskov/bayun-ms-users
+[submodule "bayun-ms-forms"]
+	path = bayun-ms-forms
+	url = https://github.com/msyaskov/bayun-ms-forms
+[submodule "bayun-id"]
+	path = bayun-id
+	url = https://github.com/msyaskov/bayun-id
+[submodule "bayun-wc-id"]
+	path = bayun-wc-id
+	url = https://github.com/msyaskov/bayun-wc-id
+[submodule "bayun-wc-forms"]
+	path = bayun-wc-forms
+	url = https://github.com/msyaskov/bayun-wc-forms

@@ -1,0 +1,115 @@
+version: "3"
+services:
+  eureka:
+    container_name: eureka
+    image: 192.168.0.3:5000/bayun/eureka
+    restart: always
+    ports:
+      - "8761:8761"
+  id:
+    container_name: 'id'
+    image: 192.168.0.3:5000/bayun/id:latest
+    restart: always
+    depends_on:
+      - eureka
+      - id-postgres
+      - id-redis
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_REDIS_PASSWORD=pass
+  id-postgres:
+    container_name: 'id-postgres'
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'pass'
+      POSTGRES_DB: 'id_db'
+      PGDATA: /home/user/data/pgdata
+    volumes:
+      - id-postgres-vol:/home/user/data
+  id-redis:
+    container_name: 'id-redis'
+    image: bitnami/redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: 'pass'
+  id-wc:
+    container_name: 'id-wc'
+    image: 192.168.0.3:5000/bayun/wc-sso:latest
+  ms-users:
+    container_name: 'ms-users'
+    image: 192.168.0.3:5000/bayun/ms-users
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ms-users-postgres
+      - eureka
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SERVER_PORT=8020
+      - LOGGING_LEVEL_ROOT=TRACE
+      - BAYUN_SSO_URI=http://sso:8000
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://192.168.0.3:5442/ms_users_db
+  ms-users-postgres:
+    container_name: 'ms-users-postgres'
+    image: postgres:latest
+    ports:
+      - "5442:5432"
+    environment:
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'pass'
+      POSTGRES_DB: 'ms_users_db'
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ms-users-postgres-vol:/var/lib/postgresql/data
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    restart: always
+    ports:
+      - "443:443"
+    volumes:
+      - etc-nginx:/etc/nginx
+  api-gateway:
+    container_name: 'api-gateway'
+    image: 192.168.0.3:5000/bayun/api-gateway
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod,cors
+      - LOGGING_LEVEL_ROOT=TRACE
+  api-forms:
+    container_name: 'api-forms'
+    image: 192.168.0.3:5000/bayun/api-forms
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+  ms-forms:
+    container_name: 'ms-forms'
+    image: 192.168.0.3:5000/bayun/ms-forms
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - LOGGING_LEVEL_ROOT=TRACE
+    ports:
+      - "8070:8080"
+    depends_on:
+      - ms-forms-mongodb
+  ms-forms-mongodb:
+    container_name: 'ms-forms-mongodb'
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ms-forms-mongodb-vol:/data/db
+volumes:
+  ms-forms-mongodb-vol:
+  id-postgres-vol:
+  ms-users-postgres-vol:
+  etc-nginx:
